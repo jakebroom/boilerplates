@@ -24,17 +24,17 @@ source "proxmox-iso" "ubuntu-server-jammy" {
     username = "${var.proxmox_api_token_id}"
     token = "${var.proxmox_api_token_secret}"
     # (Optional) Skip TLS Verification
-    # insecure_skip_tls_verify = true
+    insecure_skip_tls_verify = true
     
     # VM General Settings
-    node = "your-proxmox-node"
-    vm_id = "100"
+    node = "proxmox"
+    vm_id = "120"
     vm_name = "ubuntu-server-jammy"
     template_description = "Ubuntu Server jammy Image"
 
     # VM OS Settings
     # (Option 1) Local ISO File
-    # iso_file = "local:iso/ubuntu-22.04-live-server-amd64.iso"
+    iso_file = "local:iso/ubuntu-22.04.3-live-server-amd64.iso"
     # - or -
     # (Option 2) Download ISO
     # iso_url = "https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso"
@@ -50,23 +50,23 @@ source "proxmox-iso" "ubuntu-server-jammy" {
 
     disks {
         disk_size = "20G"
-        format = "qcow2"
+        format = "raw"
         storage_pool = "local-lvm"
-        storage_pool_type = "lvm"
         type = "virtio"
     }
 
     # VM CPU Settings
-    cores = "1"
+    cores = "4"
     
     # VM Memory Settings
-    memory = "2048" 
+    memory = "4096" 
 
     # VM Network Settings
     network_adapters {
-        model = "virtio"
-        bridge = "vmbr0"
-        firewall = "false"
+      model = "virtio"
+      bridge = "vmbr0"
+      vlan_tag = "1"
+      firewall = false
     } 
 
     # VM Cloud-Init Settings
@@ -75,27 +75,29 @@ source "proxmox-iso" "ubuntu-server-jammy" {
 
     # PACKER Boot Commands
     boot_command = [
-        "<esc><wait>",
-        "e<wait>",
-        "<down><down><down><end>",
-        "<bs><bs><bs><bs><wait>",
-        "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
-        "<f10><wait>"
+        "c<wait>",
+        "linux /casper/vmlinuz autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ <enter><wait>",
+        "initrd /casper/initrd<enter><wait>",
+        "boot<enter>",
+        "<wait>"
     ]
+
+
+
     boot = "c"
     boot_wait = "5s"
 
     # PACKER Autoinstall Settings
     http_directory = "http" 
     # (Optional) Bind IP Address and Port
-    # http_bind_address = "0.0.0.0"
+    http_bind_address = "192.168.1.84"
     # http_port_min = 8802
     # http_port_max = 8802
 
-    ssh_username = "your-user-name"
+    ssh_username = "jake"
 
     # (Option 1) Add your Password here
-    # ssh_password = "your-password"
+     ssh_password = "Allerhayes23!"
     # - or -
     # (Option 2) Add your Private SSH KEY file here
     # ssh_private_key_file = "~/.ssh/id_rsa"
